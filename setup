@@ -1,0 +1,37 @@
+#!/bin/bash
+
+etcd_api=http://${ETCD_API}/v2/keys
+ssh_key="id_agent.pem"
+
+function parse_json()
+{
+    echo $1 | sed -e 's/[{}]/''/g' | awk -F=':' -v RS=',' "\$1~/\"$2\"/ {print}" | sed -e "s/\"$2\"://" | tr -d "\n\t" | sed -e 's/\\"/"/g' | sed -e 's/\\\\/\\/g' | sed -e 's/^[ \t]*//g' | sed -e 's/^"//'  -e 's/"$//'
+}
+
+until [[ "$agent_private_key_json"  != "" && "$fleet_api_ip" != "" && "$agent_pub_ip" != "" ]];
+do
+    echo "waiting for etcd keys"
+    sleep 0
+    agent_private_key_json="$(curl -sL ${etcd_api}/agent-pri-ssh-key )"
+    fleet_api_ip="$(curl -sL ${etcd_api}/agent-fleet-api | grep -Po '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*')"
+    agent_pub_ip="$(curl -sL $etcd_api/agent-public-ip | grep -Po '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*')"
+done
+
+
+echo Keys found
+agent_private_key_enc="`parse_json  \"$agent_private_key_json\" value`"
+
+echo $agent_private_key_json
+echo $agent_private_key_enc
+
+agent_private_key=`echo -e $agent_private_key_enc | base64 --decode`
+
+echo -e "$agent_private_key" > $ssh_key
+chmod 400 $ssh_key
+
+echo -e "$agent_private_key"
+cat $ssh_key
+
+echo ssh -o StrictHostKeyChecking=no  -i $ssh_key core@$agent_pub_ip "sudo bash -c \"\$(curl http://download.panamax.io/agent/pmx-agent-install)  && cd ~/pmx-agent && ./pmx-agent init -type=fleet -api=$fleet_api_ip -agent_ip=$agent_pub_ip\""
+
+ssh -o StrictHostKeyChecking=no  -i $ssh_key core@$agent_pub_ip "sudo bash -c \"\$(curl http://download.panamax.io/agent/pmx-agent-install)  && cd ~/pmx-agent && ./pmx-agent init -type=fleet -api=$fleet_api_ip -agent_ip=$agent_pub_ip\""
