@@ -31,12 +31,14 @@ key=$(sed -n '/START/,/END/p' agent_key | awk -F "==============================
 key=${key//$'\n'/}
 echo "{ \"name\" : \"$(cat /proc/sys/kernel/random/uuid)\", \"auth_blob\" : \"$key\" }" > post_data.json
 
+docker0_ip=${DOCKER0_IP:-"172.17.42.1"}
+api_port=${API_PORT:-3001}
+
 curl -X POST \
      -H 'Content-Type:application/json' \
      -H 'Accept: application/json' \
      --data-binary @post_data.json  \
-     http://${DOCKER0_IP}:${API_PORT}/deployment_targets
-
+     http://${docker0_ip}:${api_port}/deployment_targets
 echo -e "\nThe Panamax Remote Agent and Adapter are now installed on your Installer node ($agent_pub_ip)."
 
 until [ "1" == "0" ];
