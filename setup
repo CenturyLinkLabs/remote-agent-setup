@@ -8,7 +8,7 @@ function parse_json()
     echo $1 | sed -e 's/[{}]/''/g' | awk -F=':' -v RS=',' "\$1~/\"$2\"/ {print}" | sed -e "s/\"$2\"://" | tr -d "\n\t" | sed -e 's/\\"/"/g' | sed -e 's/\\\\/\\/g' | sed -e 's/^[ \t]*//g' | sed -e 's/^"//'  -e 's/"$//'
 }
 
-until [[ "$agent_private_key_json"  != "" && "$fleet_api_ip" != "" && "" != "" ]];
+until [[ "$agent_private_key_json"  != "" && "$fleet_api_ip" != "" && "$agent_pub_ip" != "" ]];
 do
     echo "waiting for etcd keys"
     sleep 10
@@ -20,13 +20,22 @@ done
 
 echo Keys found
 agent_private_key_enc="`parse_json  \"$agent_private_key_json\" value`"
-
 agent_private_key=`echo -e $agent_private_key_enc | base64 --decode`
-
 echo -e "$agent_private_key" > $ssh_key
 chmod 400 $ssh_key
 
 ssh -o StrictHostKeyChecking=no  -i $ssh_key core@$agent_pub_ip "curl http://download.panamax.io/agent/pmx-agent-install | sudo bash  && sudo bash -c \"cd ~/pmx-agent && ./pmx-agent init -adapter-type=fleet -api=$fleet_api_ip -agent-ip=$agent_pub_ip\""
+ssh -o StrictHostKeyChecking=no  -i $ssh_key core@$agent_pub_ip "sudo bash -c \"cd ~/pmx-agent && ./pmx-agent token\"" > agent_key
+
+key=$(sed -n '/START/,/END/p' agent_key | awk -F "==============================" '{print $1}')
+key=${key//$'\n'/}
+echo "{ \"name\" : \"$(cat /proc/sys/kernel/random/uuid)\", \"auth_blob\" : \"$key\" }" > post_data.json
+
+curl -X POST \
+     -H 'Content-Type:application/json' \
+     -H 'Accept: application/json' \
+     --data-binary @post_data.json  \
+     http://${DOCKER0_IP}:${API_PORT}/deployment_targets
 
 echo -e "\nThe Panamax Remote Agent and Adapter are now installed on your Installer node ($agent_pub_ip)."
 
