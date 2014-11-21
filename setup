@@ -32,9 +32,9 @@ chmod 400 $ssh_key
 echo -e "$agent_private_key"
 cat $ssh_key
 
-echo ssh -o StrictHostKeyChecking=no  -i $ssh_key core@$agent_pub_ip "sudo bash -c \"\$(curl http://download.panamax.io/agent/qa/pmx-agent-install)  && cd ~/pmx-agent && ./pmx-agent init -type=fleet -api=$fleet_api_ip -agent_ip=$agent_pub_ip\""
+set -x
 
-ssh -o StrictHostKeyChecking=no  -i $ssh_key core@$agent_pub_ip "curl http://download.panamax.io/agent/qa/pmx-agent-install | sudo bash  && sudo bash -c\"cd ~/pmx-agent && ./pmx-agent init -adapter-type=fleet -api=$fleet_api_ip -agent_ip=$agent_pub_ip\""
+ssh -o StrictHostKeyChecking=no  -i $ssh_key core@$agent_pub_ip "curl http://download.panamax.io/agent/pmx-agent-install | sudo bash  && sudo bash -c \"cd ~/pmx-agent && ./pmx-agent init -adapter-type=fleet -api=$fleet_api_ip -agent-ip=$agent_pub_ip\""
 
 echo -e "\nThe remote agent adapter are setup now"
 
