@@ -13,8 +13,8 @@ do
     echo "waiting for etcd keys"
     sleep 10
     agent_private_key_json="$(curl -sL ${etcd_api}/agent-pri-ssh-key )"
-    fleet_api_ip="$(curl -sL ${etcd_api}/agent-fleet-api | grep -Po '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*')"
-    agent_pub_ip="$(curl -sL $etcd_api/agent-public-ip | grep -Po '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*')"
+    fleet_api_ip="$(curl -sL ${etcd_api}/agent-fleet-api | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*')"
+    agent_pub_ip="$(curl -sL $etcd_api/agent-public-ip | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*')"
 done
 
 

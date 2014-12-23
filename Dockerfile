@@ -1,6 +1,7 @@
-FROM ubuntu:trusty
+FROM progrium/busybox
 
-RUN apt-get update && apt-get install -y curl openssh-client
+RUN opkg-install bash openssh-client curl coreutils-base64
+ENV SHELL /bin/bash
 ADD setup setup
 RUN chmod +x setup
 CMD "./setup"
