@@ -1,12 +1,6 @@
 #!/bin/bash
 
-etcd_api=http://${ETCD_API}/v2/keys
 ssh_key="id_agent.pem"
-
-function parse_json()
-{
-    echo $1 | sed -e 's/[{}]/''/g' | awk -F=':' -v RS=',' "\$1~/\"$2\"/ {print}" | sed -e "s/\"$2\"://" | tr -d "\n\t" | sed -e 's/\\"/"/g' | sed -e 's/\\\\/\\/g' | sed -e 's/^[ \t]*//g' | sed -e 's/^"//'  -e 's/"$//'
-}
 
 until [[ "$agent_private_key"  != "" && "$agent_fleet_api" != "" && "$agent_pub_ip" != "" ]];
 do
