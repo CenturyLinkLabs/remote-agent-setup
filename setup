@@ -1,12 +1,27 @@
 #!/bin/bash
 
-ssh_key="id_agent.pem"
 
-until [[ "$AGENT_PRIVATE_KEY"  != "" && "$AGENT_FLEET_API" != "" && "$AGENT_PUB_IP" != "" ]];
-do
-    echo "waiting for keys"
-    sleep 10
+for line in `cat`; do
+   eval $line
 done
+
+ssh_key="id_agent.pem"
+adapter_type="fleet"
+adapter_ip=""
+
+#until ([[ "$AGENT_PRIVATE_KEY"  != "" && "$AGENT_PUBLIC_IP" != ""]] && [[ "$AGENT_FLEET_API" != "" || "$AGENT_KUBER_API" != "" ]]);
+#do
+#    echo "waiting for keys"
+#    sleep 10
+#done
+
+if [[ "$AGENT_FLEET_API" != "" ]]; then
+    adapter_ip="http://$AGENT_FLEET_API:4001"
+    adapter_type="fleet"
+else
+    adapter_ip="$AGENT_KUBER_API"
+    adapter_type="kubernetes"	
+fi
 
 
 echo Keys found
@@ -14,8 +29,8 @@ agent_private_key=`echo -e $AGENT_PRIVATE_KEY | base64 --decode`
 echo -e "$agent_private_key" > $ssh_key
 chmod 400 $ssh_key
 
-ssh -o StrictHostKeyChecking=no  -i $ssh_key core@$AGENT_PUB_IP "curl http://download.panamax.io/agent/pmx-agent-install | sudo bash  && sudo bash -c \"cd ~/pmx-agent && ./pmx-agent init -adapter-type=fleet -api=http://$AGENT_FLEET_API:4001 -agent-ip=$AGENT_PUB_IP\""
-ssh -o StrictHostKeyChecking=no  -i $ssh_key core@$AGENT_PUB_IP "sudo bash -c \"cd ~/pmx-agent && ./pmx-agent token\"" > agent_key
+ssh -o StrictHostKeyChecking=no  -i $ssh_key core@$AGENT_PUBLIC_IP "curl http://download.panamax.io/agent/pmx-agent-install | sudo bash  && sudo bash -c \"cd ~/pmx-agent && ./pmx-agent init -adapter-type=$adapter_type -api=$adapter_ip -agent-ip=$AGENT_PUBLIC_IP\""
+ssh -o StrictHostKeyChecking=no  -i $ssh_key core@$AGENT_PUBLIC_IP "sudo bash -c \"cd ~/pmx-agent && ./pmx-agent token\"" > agent_key
 
 key=$(sed -n '/START/,/END/p' agent_key | awk -F "==============================" '{print $1}')
 key=${key//$'\n'/}
@@ -31,7 +46,7 @@ curl -X POST \
      --data-binary @post_data.json  \
      http://${docker0_ip}:${api_port}/deployment_targets
 
-echo -e "\nThe Panamax Remote Agent and Adapter are now installed on your Installer node ($AGENT_PUB_IP)."
+echo -e "\nThe Panamax Remote Agent and Adapter are now installed on your Installer node ($AGENT_PUBLIC_IP)."
 
 until [ "1" == "0" ];
 do
