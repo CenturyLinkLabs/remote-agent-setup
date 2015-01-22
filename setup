@@ -1,7 +1,9 @@
 #!/bin/bash
 
+set -x
 
 for line in `cat`; do
+   echo $line
    eval $line
 done
 
@@ -23,8 +25,6 @@ else
     adapter_type="kubernetes"	
 fi
 
-
-echo Keys found
 agent_private_key=`echo -e $AGENT_PRIVATE_KEY | base64 --decode`
 echo -e "$agent_private_key" > $ssh_key
 chmod 400 $ssh_key
@@ -47,8 +47,3 @@ curl -X POST \
      http://${docker0_ip}:${api_port}/deployment_targets
 
 echo -e "\nThe Panamax Remote Agent and Adapter are now installed on your Installer node ($AGENT_PUBLIC_IP)."
-
-until [ "1" == "0" ];
-do
-  sleep 20
-done
