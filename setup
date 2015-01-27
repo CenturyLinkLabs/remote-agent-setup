@@ -1,6 +1,9 @@
 #!/bin/bash
 
-set -e
+echo -e "\nInstalling panamax remote agent/adapter"
+
+#set -e
+set -x
 
 for line in `cat`; do
    eval $line
