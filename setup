@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 echo -e "\nInstalling Docker, Panamax remote agent/adapter on Agent VM"
 
 for line in `cat`; do
@@ -23,14 +25,11 @@ agent_private_key=`echo $AGENT_PRIVATE_KEY | base64 --decode`
 echo -e "$agent_private_key" > $ssh_key
 chmod 400 $ssh_key
 
-echo -e "\nInstalling Docker on remote agent"
-ssh -o StrictHostKeyChecking=no  -i $ssh_key root@$AGENT_PUBLIC_IP "echo -e \"\\nnameserver 8.8.8.8\" >> /etc/resolv.conf"
-ssh -o StrictHostKeyChecking=no  -i $ssh_key root@$AGENT_PUBLIC_IP "curl -sSL https://get.docker.com/ubuntu/ | sudo sh"
-
-echo -e "\nInstalling Panamax remote agent/adapter"
-ssh -o StrictHostKeyChecking=no  -i $ssh_key root@$AGENT_PUBLIC_IP "curl http://download.panamax.io/agent/qa/pmx-agent-install | sudo bash  "
-ssh -o StrictHostKeyChecking=no  -i $ssh_key root@$AGENT_PUBLIC_IP "cd ~/pmx-agent && ./pmx-agent init -adapter-type=$adapter_type -api=$adapter_ip -agent-ip=$AGENT_PUBLIC_IP"
+echo "Installing agent components on remote machine"
+scp -o StrictHostKeyChecking=no  -i $ssh_key install_pmx_agent root@$AGENT_PUBLIC_IP:~/
+ssh -o StrictHostKeyChecking=no  -t -t -i $ssh_key root@$AGENT_PUBLIC_IP  "chmod +x install_pmx_agent && ./install_pmx_agent $adapter_type $adapter_ip $AGENT_PUBLIC_IP"
 ssh -o StrictHostKeyChecking=no  -i $ssh_key root@$AGENT_PUBLIC_IP "cat ~/pmx-agent/agent/panamax_agent_key" > agent_key
+echo "Agent components installation on remote machine complete."
 
 key="$(<agent_key)"
 echo $key
@@ -39,8 +38,6 @@ echo -e "\nAdding remote target to panamax"
 key=${key//$'\n'/}
 remote_target_name=${REMOTE_TARGET_NAME:-$(cat /proc/sys/kernel/random/uuid)}
 echo "{ \"name\" : \"$remote_target_name\", \"auth_blob\" : \"$key\" }" > post_data.json
-
-cat post_data.json
 
 docker0_ip=${DOCKER0_IP:-"172.17.42.1"}
 api_port=${API_PORT:-3001}
@@ -51,6 +48,6 @@ curl -X POST \
      --data-binary @post_data.json  \
      http://${docker0_ip}:${api_port}/deployment_targets
 
-echo -e "\nThe Panamax Remote Agent and Adapter are now installed on your Installer node ($AGENT_PUBLIC_IP)."
+echo -e "\nThe Panamax Remote Agent and Adapter are now installed on your Installer node ($remote_target_name: $AGENT_PUBLIC_IP)."
 
 exit 0;
