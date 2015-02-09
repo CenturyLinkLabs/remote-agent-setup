@@ -11,8 +11,8 @@ function runCmd {
 
 echo -e "\nInstalling Docker on remote agent"
 echo -e "\nnameserver 8.8.8.8 >> /etc/resolv.conf"
-runCmd "curl -sSL https://get.docker.com/ubuntu/ | sudo sh"
+eval "curl -sSL https://get.docker.com/ubuntu/ | sudo sh"
 
 echo -e "\nInstalling Panamax remote agent/adapter"
-runCmd "curl http://download.panamax.io/agent/qa/pmx-agent-install | sudo bash"
-runCmd "cd ~/pmx-agent && ./pmx-agent init -adapter-type=$1 -api=$2 -agent-ip=$3"
+eval "curl http://download.panamax.io/agent/qa/pmx-agent-install | sudo bash"
+eval "cd ~/pmx-agent && ./pmx-agent init -adapter-type=$1 -api=$2 -agent-ip=$3"
