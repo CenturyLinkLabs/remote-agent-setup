@@ -23,7 +23,7 @@ fi
 agent_private_key=`echo $AGENT_PRIVATE_KEY | base64 --decode`
 
 if [[ "$UBUNTU_LOGIN_USER" == "" ]]; then
-    UBUNTU_LOGIN_USER="root"
+    UBUNTU_LOGIN_USER="ubuntu"
 fi
 
 echo -e "$agent_private_key" > $ssh_key
