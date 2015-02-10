@@ -54,7 +54,7 @@ curl -X POST \
 
 echo -e "\nThe Panamax Remote Agent and Adapter are now installed on your Installer node ($remote_target_name: $AGENT_PUBLIC_IP)."
 echo -e "\n\n$agent_private_key"
-echo -e "\n\n****Copy the following private key and keep in a safe place. You need this key to access your new cluster and agent via ssh.*****\n\n"
+echo -e "\n\n****Copy the above private key and keep in a safe place. You need this key to access your new cluster and agent via ssh.*****\n\n"
 
 
 
