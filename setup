@@ -36,7 +36,6 @@ ssh -o StrictHostKeyChecking=no  -i $ssh_key $UBUNTU_LOGIN_USER@$AGENT_PUBLIC_IP
 echo "Agent components installation on remote machine complete."
 
 key="$(<agent_key)"
-echo $key
 
 echo -e "\nAdding remote target to panamax"
 key=${key//$'\n'/}
@@ -52,6 +51,13 @@ curl -X POST \
      --data-binary @post_data.json  \
      http://${docker0_ip}:${api_port}/deployment_targets
 
+
+
+echo "****Copy the following private key and keep in a safe place. You need this key to access your new cluster and agent via ssh.*****"
+echo $key
+
 echo -e "\nThe Panamax Remote Agent and Adapter are now installed on your Installer node ($remote_target_name: $AGENT_PUBLIC_IP)."
+
+
 
 exit 0;
