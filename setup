@@ -52,9 +52,8 @@ curl -X POST \
      http://${docker0_ip}:${api_port}/deployment_targets
 
 
-
 echo "****Copy the following private key and keep in a safe place. You need this key to access your new cluster and agent via ssh.*****"
-echo $key
+echo $ssh_key
 
 echo -e "\nThe Panamax Remote Agent and Adapter are now installed on your Installer node ($remote_target_name: $AGENT_PUBLIC_IP)."
 
