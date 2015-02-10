@@ -1,14 +1,5 @@
 #!/bin/bash
 
-function runCmd {
-    eval "$@" >/dev/null &
-    PID=$!
-    while $(kill -n 0 $PID 2> /dev/null)
-    do
-      sleep 2
-    done
-}
-
 echo -e "\nInstalling Docker on remote agent"
 echo -e "\nnameserver 8.8.8.8 >> /etc/resolv.conf"
 sudo apt-get -y update
