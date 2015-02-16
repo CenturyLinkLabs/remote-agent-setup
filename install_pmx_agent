@@ -1,18 +1,31 @@
 #!/bin/bash
 
-function runCmd {
-    eval "$@" >/dev/null &
-    PID=$!
-    while $(kill -n 0 $PID 2> /dev/null)
-    do
-      sleep 2
-    done
-}
-
 echo -e "\nInstalling Docker on remote agent"
 echo -e "\nnameserver 8.8.8.8 >> /etc/resolv.conf"
-runCmd "curl -sSL https://get.docker.com/ubuntu/ | sudo sh"
+sudo apt-get -y update
+curl -sSL https://get.docker.com/ubuntu/ | sudo sh
 
 echo -e "\nInstalling Panamax remote agent/adapter"
-runCmd "curl http://download.panamax.io/agent/qa/pmx-agent-install | sudo bash"
-runCmd "cd ~/pmx-agent && ./pmx-agent init -adapter-type=$1 -api=$2 -agent-ip=$3"
+curl http://download.panamax.io/agent/qa/pmx-agent-install | sudo bash
+cd ~/pmx-agent && sudo ./pmx-agent init -adapter-type=$1 -api=$2 -agent-ip=$3
+
+
+
+exit 0;
+
+
+export      AWS_ACCESS_KEY_ID=AKIAJZLMUDMU6SPKRNXA
+export      AWS_SECRET_ACCESS_KEY=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
+export      REGION=us-west-2a
+export      MINION_COUNT=1
+export      VM_SIZE=t2.micro
+
+
+export USERNAME=cakkineni
+export CPU=2
+export MEMORY_GB=2
+export PASSWORD=Svvs12345~
+export REGION=WA1
+export GROUP_ID=wa1-36927
+export MINION_COUNT=1
+export REMOTE_TARGET_NAME=KuberTestCLC

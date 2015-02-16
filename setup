@@ -22,17 +22,20 @@ fi
 
 agent_private_key=`echo $AGENT_PRIVATE_KEY | base64 --decode`
 
+if [[ "$UBUNTU_LOGIN_USER" == "" ]]; then
+    UBUNTU_LOGIN_USER="root"
+fi
+
 echo -e "$agent_private_key" > $ssh_key
 chmod 400 $ssh_key
 
 echo "Installing agent components on remote machine"
-scp -o StrictHostKeyChecking=no  -i $ssh_key install_pmx_agent root@$AGENT_PUBLIC_IP:~/
-ssh -o StrictHostKeyChecking=no  -t -t -i $ssh_key root@$AGENT_PUBLIC_IP  "chmod +x install_pmx_agent && ./install_pmx_agent $adapter_type $adapter_ip $AGENT_PUBLIC_IP"
-ssh -o StrictHostKeyChecking=no  -i $ssh_key root@$AGENT_PUBLIC_IP "cat ~/pmx-agent/agent/panamax_agent_key" > agent_key
+scp -o StrictHostKeyChecking=no  -i $ssh_key install_pmx_agent $UBUNTU_LOGIN_USER@$AGENT_PUBLIC_IP:~/
+ssh -o StrictHostKeyChecking=no  -t -t -i $ssh_key $UBUNTU_LOGIN_USER@$AGENT_PUBLIC_IP  "chmod +x install_pmx_agent && sudo ./install_pmx_agent $adapter_type $adapter_ip $AGENT_PUBLIC_IP"
+ssh -o StrictHostKeyChecking=no  -i $ssh_key $UBUNTU_LOGIN_USER@$AGENT_PUBLIC_IP "cat ~/pmx-agent/agent/panamax_agent_key" > agent_key
 echo "Agent components installation on remote machine complete."
 
 key="$(<agent_key)"
-echo $key
 
 echo -e "\nAdding remote target to panamax"
 key=${key//$'\n'/}
@@ -48,6 +51,11 @@ curl -X POST \
      --data-binary @post_data.json  \
      http://${docker0_ip}:${api_port}/deployment_targets
 
+
 echo -e "\nThe Panamax Remote Agent and Adapter are now installed on your Installer node ($remote_target_name: $AGENT_PUBLIC_IP)."
+echo -e "\n\n$agent_private_key"
+echo -e "\n\n****Copy the above private key and keep in a safe place. \n\nYou need this key to access your new cluster and agent via ssh.*****\n\n"
+
+
 
 exit 0;
