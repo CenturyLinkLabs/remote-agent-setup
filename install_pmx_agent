@@ -9,23 +9,4 @@ echo -e "\nInstalling Panamax remote agent/adapter"
 curl http://download.panamax.io/agent/qa/pmx-agent-install | sudo bash
 cd ~/pmx-agent && sudo ./pmx-agent init -adapter-type=$1 -api=$2 -agent-ip=$3
 
-
-
 exit 0;
-
-
-export      AWS_ACCESS_KEY_ID=AKIAJZLMUDMU6SPKRNXA
-export      AWS_SECRET_ACCESS_KEY=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
-export      REGION=us-west-2a
-export      MINION_COUNT=1
-export      VM_SIZE=t2.micro
-
-
-export USERNAME=cakkineni
-export CPU=2
-export MEMORY_GB=2
-export PASSWORD=Svvs12345~
-export REGION=WA1
-export GROUP_ID=wa1-36927
-export MINION_COUNT=1
-export REMOTE_TARGET_NAME=KuberTestCLC
