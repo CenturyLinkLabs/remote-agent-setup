@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 echo -e "\nInstalling Docker, Panamax remote agent/adapter on Agent VM"
 
 for line in `cat`; do
