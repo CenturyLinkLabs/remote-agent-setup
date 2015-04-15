@@ -28,19 +28,21 @@ echo -e "$agent_private_key" > $ssh_key
 chmod 400 $ssh_key
 
 echo "Installing agent components on remote machine"
-echo "Waiting on SSH"
-ssh -o StrictHostKeyChecking=no  -t -t -i $ssh_key $UBUNTU_LOGIN_USER@$AGENT_PUBLIC_IP  "echo ."
 
+echo "Waiting on SSH"
+sleep 10
 i=0
-while test $? -gt 0
+ssh -o StrictHostKeyChecking=no  -t -t -i $ssh_key $UBUNTU_LOGIN_USER@$AGENT_PUBLIC_IP  "exit 0"
+while  [[ "$?" > 0 ]];
 do
-    sleep 5
     if [[ $i == 24 ]]; then
         exit 1
     fi
     i=$((i+1))
-    ssh -o StrictHostKeyChecking=no  -t -t -i $ssh_key $UBUNTU_LOGIN_USER@$AGENT_PUBLIC_IP  "echo ."
+    sleep 5
+    ssh -o StrictHostKeyChecking=no  -t -t -i $ssh_key $UBUNTU_LOGIN_USER@$AGENT_PUBLIC_IP  "exit 0"
 done
+
 
 scp -o StrictHostKeyChecking=no  -i $ssh_key install_pmx_agent $UBUNTU_LOGIN_USER@$AGENT_PUBLIC_IP:~/
 ssh -o StrictHostKeyChecking=no  -t -t -i $ssh_key $UBUNTU_LOGIN_USER@$AGENT_PUBLIC_IP  "chmod +x install_pmx_agent && sudo ./install_pmx_agent $adapter_type $adapter_ip $AGENT_PUBLIC_IP"
