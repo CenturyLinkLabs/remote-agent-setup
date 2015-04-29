@@ -6,7 +6,7 @@ sudo apt-get -y update
 curl -sSL https://get.docker.com/ubuntu/ | sudo sh
 
 echo -e "\nInstalling Panamax remote agent/adapter"
-curl http://download.panamax.io/agent/qa/pmx-agent-install | sudo bash
+curl http://download.panamax.io/agent/pmx-agent-install | sudo bash
 cd ~/pmx-agent && sudo ./pmx-agent init -adapter-type=$1 -api=$2 -agent-ip=$3
 
 exit 0;
